@@ -1,12 +1,8 @@
 import json
 import os
-import re
 import requests
-from dotenv import load_dotenv
+from inditex_helpers import extract_product_ids_from_page, check_inditex_stock
 
-load_dotenv()
-
-# 🔽 SADECE BU KISIM DEĞİŞTİ
 BOT_API = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -15,92 +11,21 @@ print("DEBUG CHAT_ID:", "***" if CHAT_ID else None)
 
 TELEGRAM_ENABLED = True
 if not BOT_API or not CHAT_ID:
-    print("⚠️ Telegram env variables missing, mesaj gönderilmeyecek")
+    print("⚠️ Telegram env variables missing")
     TELEGRAM_ENABLED = False
 
-def send_telegram(message):
+def send_telegram(msg):
     if not TELEGRAM_ENABLED:
-        print("📭 Telegram pasif, mesaj atlanıyor")
         return
-
     url = f"https://api.telegram.org/bot{BOT_API}/sendMessage"
-    requests.post(url, data={"chat_id": CHAT_ID, "text": message}, timeout=10)
+    requests.post(url, data={"chat_id": CHAT_ID, "text": msg}, timeout=10)
 
-# -------------------------------------------------
-# PRODUCT ID PARSERS
-# -------------------------------------------------
-
-def extract_inditex_product_id(url):
-    """
-    Zara / Bershka / Stradivarius
-    c0p455810677.html  -> 455810677
-    """
-    match = re.search(r"c0p(\d+)", url)
-    return match.group(1) if match else None
-
-def extract_mango_product_id(url):
-    """
-    tokali-chelsea-bot_87090411 -> 87090411
-    """
-    match = re.search(r"_(\d+)", url)
-    return match.group(1) if match else None
-
-# -------------------------------------------------
-# STOCK CHECKERS
-# -------------------------------------------------
-
-def check_inditex_stock(store, product_id, sizes):
-    store_ids = {
-        "zara": "11701",
-        "bershka": "34009455",
-        "stradivarius": "34009555"
-    }
-
-    store_id = store_ids[store]
-
-    url = f"https://www.{store}.com/itxrest/2/catalog/store/{store_id}/product/{product_id}/stock"
-
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-    }
-
-    r = requests.get(url, headers=headers, timeout=10)
-    r.raise_for_status()
-    data = r.json()
-
-    for size in data.get("sizes", []):
-        if size.get("name") in sizes and size.get("availability") == "in_stock":
-            return size["name"]
-
-    return None
-
-def check_mango_stock(product_id, sizes):
-    url = f"https://shop.mango.com/ws/products/{product_id}/stock"
-
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-    }
-
-    r = requests.get(url, headers=headers, timeout=10)
-    r.raise_for_status()
-    data = r.json()
-
-    for size in data.get("sizes", []):
-        if size.get("label") in sizes and size.get("stock", 0) > 0:
-            return size["label"]
-
-    return None
-
-# -------------------------------------------------
-# MAIN
-# -------------------------------------------------
+# ---------------- MAIN ----------------
 
 with open("config.json") as f:
     config = json.load(f)
 
-sizes_to_check = config["sizes_to_check"]
+sizes = config["sizes_to_check"]
 
 print("🟢 Stok kontrolü başladı")
 
@@ -108,31 +33,24 @@ for item in config["urls"]:
     store = item["store"]
     url = item["url"]
 
-    if store == "mango":
-        product_id = extract_mango_product_id(url)
-    else:
-        product_id = extract_inditex_product_id(url)
-
-    print(f"🔎 {store.upper()} | {product_id}")
-
-    if not product_id:
-        print("⚠️ Product ID çıkarılamadı")
-        continue
+    print(f"\n🔎 {store.upper()} sayfası taranıyor")
 
     try:
-        if store in ["zara", "bershka", "stradivarius"]:
-            size = check_inditex_stock(store, product_id, sizes_to_check)
-        elif store == "mango":
-            size = check_mango_stock(product_id, sizes_to_check)
-        else:
+        product_ids = extract_product_ids_from_page(url)
+
+        if not product_ids:
+            print("⚠️ Product ID bulunamadı")
             continue
 
-        if size:
-            msg = f"🛍️ {store.upper()} | {size} BEDEN STOKTA!\n{url}"
-            print("✅ STOK VAR")
-            send_telegram(msg)
+        for pid in product_ids:
+            size = check_inditex_stock(store, pid, sizes)
+            if size:
+                msg = f"🛍️ {store.upper()} | {size} BEDEN STOKTA!\n{url}"
+                print("✅ STOK VAR:", pid)
+                send_telegram(msg)
+                break
         else:
             print("⛔ Stok yok")
 
     except Exception as e:
-        print(f"⚠️ Hata: {e}")
+        print("⚠️ Hata:", e)
