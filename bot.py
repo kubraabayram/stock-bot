@@ -65,22 +65,28 @@ def check_inditex_page(url, sizes):
     wanted_color_id = extract_color_id(url)
 
     try:
-        colors = data["product"]["detail"]["colors"]
-        for color in colors:
-            if wanted_color_id and str(color.get("id")) != wanted_color_id:
-                continue  # ❗ SADECE linkteki renk
+        components = data["product"]["detail"]["commercialComponents"]
 
-            for size in color.get("sizes", []):
-                availability = size.get("availability")
-                name = size.get("name", "")
+        for comp in components:
+            for component in comp.get("components", []):
+                for sku in component.get("skus", []):
 
-                if (
-                    size_matches(name, sizes)
-                    and availability in ["in_stock", "low_stock", "available"]
-                ):
-                    return name
-    except Exception:
-        pass
+                    # renk filtresi (linkteki colorId)
+                    if wanted_color_id:
+                        if str(sku.get("colorId")) != wanted_color_id:
+                            continue
+
+                    size_name = sku.get("sizeName", "")
+                    availability = sku.get("availability")
+
+                    if (
+                        size_matches(size_name, sizes)
+                        and availability in ["in_stock", "low_stock", "available"]
+                    ):
+                        return size_name
+
+    except Exception as e:
+        print("DEBUG parse error:", e)
 
     return None
 
@@ -121,3 +127,4 @@ for item in config["urls"]:
 
     except Exception as e:
         print(f"⚠️ Hata: {e}")
+
