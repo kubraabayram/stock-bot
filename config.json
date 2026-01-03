@@ -1,8 +1,9 @@
 {
+  "sizes_to_check": ["34", "XS", "37", "STD", "Tek Beden"],
   "urls": [
     {
       "store": "mango",
-      "url": "https://shop.mango.com/tr/tr/p/kadin/ayakkab%C4%B1/cizme-ve-bot/tokal%C4%B1-chelsea-bot_87090411?c=99"
+      "url": "https://shop.mango.com/tr/tr/p/kadin/ayakkab%C4%B1/cizme-ve-bot/tokal%C4%B1-chelsea-bot_87090411?c=99&utm_source=product-share&utm_medium=social"
     },
     {
       "store": "bershka",
@@ -26,8 +27,7 @@
     },
     {
       "store": "zara",
-      "url": "https://www.zara.com/tr/tr/blok-topuklu-bilekte-bot-p13101610.html"
+      "url": "https://www.zara.com/share/blok-topuklu-bilekte-bot-p13101610.html?v1=495716760&utm_campaign=productShare&utm_medium=mobile_sharing_iOS&utm_source=red_social_movil"
     }
-  ],
-  "sizes_to_check": ["34", "XS", "37", "STD", "Tek Beden"]
+  ]
 }
