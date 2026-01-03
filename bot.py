@@ -6,16 +6,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_API = os.getenv("BOT_API")
-CHAT_ID = os.getenv("CHAT_ID")
+# 🔽 SADECE BU KISIM DEĞİŞTİ
+BOT_API = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 print("DEBUG TOKEN:", "***" if BOT_API else None)
 print("DEBUG CHAT_ID:", "***" if CHAT_ID else None)
 
+TELEGRAM_ENABLED = True
 if not BOT_API or not CHAT_ID:
-    raise RuntimeError("Telegram env variables missing")
+    print("⚠️ Telegram env variables missing, mesaj gönderilmeyecek")
+    TELEGRAM_ENABLED = False
 
 def send_telegram(message):
+    if not TELEGRAM_ENABLED:
+        print("📭 Telegram pasif, mesaj atlanıyor")
+        return
+
     url = f"https://api.telegram.org/bot{BOT_API}/sendMessage"
     requests.post(url, data={"chat_id": CHAT_ID, "text": message}, timeout=10)
 
