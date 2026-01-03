@@ -1,0 +1,27 @@
+{
+    "urls": [
+        {
+            "store": "mango",
+            "url": "https://shop.mango.com/tr/tr/p/kadin/ayakkab%C4%B1/cizme-ve-bot/tokal%C4%B1-chelsea-bot_87090411?c=99&utm_source=product-share&utm_medium=social" 
+        },
+        {
+            "store": "bershka",
+            "url": "https://www.bershka.com/tr/c0p193027833.html?colorId=302"
+        },
+        {
+            "store": "bershka",
+            "url": "https://www.bershka.com/tr/c0p209095240.html?colorId=902"
+        },
+        {
+            "store": "stradivarius",
+            "url": "https://www.stradivarius.com/tr/tr/c0p469262816.html?colorId=400"
+        },
+        {
+            "store": "zara",
+            "url": "https://www.zara.com/share/blok-topuklu-bilekte-bot-p13101610.html?v1=495716760&utm_campaign=productShare&utm_medium=mobile_sharing_iOS&utm_source=red_social_movil"
+        }
+    ],
+    "sizes_to_check": ["34", "XS", "37", "STD", "Tek Beden"],
+    "sleep_min_seconds": 500,  
+    "sleep_max_seconds": 800
+}
