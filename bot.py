@@ -1,91 +1,98 @@
 import json
 import os
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+from dotenv import load_dotenv
 
-from scraperHelpers import (
-    check_stock_zara,
-    check_stock_bershka,
-    check_stock_mango,
-    check_stock_stradivarius
-)
+load_dotenv()
 
-# =====================
-# LOAD CONFIG
-# =====================
-with open("config.json", "r") as f:
-    config = json.load(f)
-
-urls_to_check = config["urls"]
-sizes_to_check = config["sizes_to_check"]
-
-# =====================
-# TELEGRAM
-# =====================
 BOT_API = os.getenv("BOT_API")
 CHAT_ID = os.getenv("CHAT_ID")
 
-def send_telegram_message(message):
-    if not BOT_API or not CHAT_ID:
-        print("Telegram env eksik")
-        return
+if not BOT_API or not CHAT_ID:
+    raise RuntimeError("Telegram env variables missing")
 
+def send_telegram(message):
     url = f"https://api.telegram.org/bot{BOT_API}/sendMessage"
-    requests.post(
-        url,
-        data={"chat_id": CHAT_ID, "text": message},
-        timeout=10
-    )
+    requests.post(url, data={"chat_id": CHAT_ID, "text": message}, timeout=10)
 
-# =====================
-# SELENIUM (TEK SEFER)
-# =====================
-chrome_options = Options()
-chrome_options.add_argument("--headless=new")
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
+# ---------------- STRADIVARIUS / BERSHKA / ZARA ----------------
 
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=chrome_options)
+def check_inditex_stock(store, product_id, sizes):
+    store_ids = {
+        "zara": "11701",
+        "bershka": "34009455",
+        "stradivarius": "34009555"
+    }
 
-print("🤖 Stok kontrolü başladı")
+    store_id = store_ids[store]
 
-# =====================
-# MAIN (TEK TUR)
-# =====================
-try:
-    for item in urls_to_check:
-        url = item["url"]
-        store = item["store"]
+    url = f"https://www.{store}.com/itxrest/2/catalog/store/{store_id}/product/{product_id}/stock"
 
-        print(f"🔍 Kontrol ediliyor: {url}")
-        driver.get(url)
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+    }
 
-        if store == "zara":
-            size = check_stock_zara(driver, sizes_to_check)
-        elif store == "stradivarius":
-            size = check_stock_stradivarius(driver, sizes_to_check)    
-        elif store == "bershka":
-            size = check_stock_bershka(driver, sizes_to_check)
+    r = requests.get(url, headers=headers, timeout=10)
+    r.raise_for_status()
+    data = r.json()
+
+    for size in data.get("sizes", []):
+        if size["name"] in sizes and size["availability"] == "in_stock":
+            return size["name"]
+
+    return None
+
+# ---------------- MANGO ----------------
+
+def check_mango_stock(product_id, sizes):
+    url = f"https://shop.mango.com/ws/products/{product_id}/stock"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+    }
+
+    r = requests.get(url, headers=headers, timeout=10)
+    r.raise_for_status()
+    data = r.json()
+
+    for size in data.get("sizes", []):
+        if size["label"] in sizes and size["stock"] > 0:
+            return size["label"]
+
+    return None
+
+# ---------------- MAIN ----------------
+
+with open("config.json") as f:
+    config = json.load(f)
+
+sizes_to_check = config["sizes_to_check"]
+
+print("🟢 Stok kontrolü başladı")
+
+for item in config["products"]:
+    store = item["store"]
+    product_id = item["product_id"]
+    url = item["url"]
+
+    print(f"🔎 Kontrol ediliyor: {store} | {product_id}")
+
+    try:
+        if store in ["zara", "bershka", "stradivarius"]:
+            size = check_inditex_stock(store, product_id, sizes_to_check)
         elif store == "mango":
-            size = check_stock_mango(driver, sizes_to_check)
+            size = check_mango_stock(product_id, sizes_to_check)
         else:
             continue
 
         if size:
-            message = f"🛍️ {size} beden STOKTA!\n{url}"
-            send_telegram_message(message)
-            print("🔥 STOK VAR")
+            msg = f"🛍️ {store.upper()} | {size} BEDEN STOKTA!\n{url}"
+            print("✅ STOK VAR")
+            send_telegram(msg)
         else:
-            print("⏳ Stok yok")
+            print("⛔ Stok yok")
 
-except Exception as e:
-    send_telegram_message(f"⚠️ Bot hata verdi:\n{e}")
-    raise
-
-finally:
-    driver.quit()
+    except Exception as e:
+        print(f"⚠️ Hata: {e}")
