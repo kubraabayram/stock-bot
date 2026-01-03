@@ -2,7 +2,7 @@ name: Stock Checker
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/15 * * * *"   # 15 dakikada bir
   workflow_dispatch:
 
 jobs:
@@ -10,18 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repo checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Python kur
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Paketleri kur
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
-      - name: Botu çalıştır
+      - name: Run bot
         env:
           BOT_API: ${{ secrets.BOT_API }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
