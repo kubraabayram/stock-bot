@@ -1,36 +1,40 @@
 {
-    "urls": [
-        {
-            "store": "mango",
-            "url": "https://shop.mango.com/tr/tr/p/kadin/ayakkab%C4%B1/cizme-ve-bot/tokal%C4%B1-chelsea-bot_87090411?c=99&utm_source=product-share&utm_medium=social" 
-        },
-        {
-            "store": "bershka",
-            "url": "https://www.bershka.com/tr/c0p193027833.html?colorId=302"
-        },
-        {
-            "store": "bershka",
-            "url": "https://www.bershka.com/tr/c0p209095240.html?colorId=902"
-        },
-        {
-            "store": "stradivarius",
-            "url": "https://www.stradivarius.com/tr/tr/c0p469262816.html?colorId=400"
-        },
-        {
-            "store": "stradivarius",
-            "url": "https://www.stradivarius.com/tr/tr/c0p455810677.html?colorId=602"
-        },
-        {
-            "store": "stradivarius",
-            "url": "https://www.stradivarius.com/tr/tr/c0p475933367.html?colorId=025"
-        },
-        {
-            "store": "zara",
-            "url": "https://www.zara.com/share/blok-topuklu-bilekte-bot-p13101610.html?v1=495716760&utm_campaign=productShare&utm_medium=mobile_sharing_iOS&utm_source=red_social_movil"
-        }
-    ],
-    "sizes_to_check": ["34", "XS", "37", "STD", "Tek Beden"],
-    "sleep_min_seconds": 500,  
-    "sleep_max_seconds": 800
+  "sizes_to_check": ["34", "XS", "37", "STD", "Tek Beden"],
+  "products": [
+    {
+      "store": "mango",
+      "product_id": "87090411",
+      "url": "https://shop.mango.com/tr/tr/p/kadin/ayakkabi/cizme-ve-bot/tokali-chelsea-bot_87090411?c=99"
+    },
+    {
+      "store": "bershka",
+      "product_id": "193027833",
+      "url": "https://www.bershka.com/tr/c0p193027833.html?colorId=302"
+    },
+    {
+      "store": "bershka",
+      "product_id": "209095240",
+      "url": "https://www.bershka.com/tr/c0p209095240.html?colorId=902"
+    },
+    {
+      "store": "stradivarius",
+      "product_id": "469262816",
+      "url": "https://www.stradivarius.com/tr/tr/c0p469262816.html?colorId=400"
+    },
+    {
+      "store": "stradivarius",
+      "product_id": "455810677",
+      "url": "https://www.stradivarius.com/tr/tr/c0p455810677.html?colorId=602"
+    },
+    {
+      "store": "stradivarius",
+      "product_id": "475933367",
+      "url": "https://www.stradivarius.com/tr/tr/c0p475933367.html?colorId=025"
+    },
+    {
+      "store": "zara",
+      "product_id": "13101610",
+      "url": "https://www.zara.com/tr/tr/blok-topuklu-bilekte-bot-p13101610.html"
+    }
+  ]
 }
-
