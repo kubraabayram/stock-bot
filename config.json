@@ -17,6 +17,14 @@
             "url": "https://www.stradivarius.com/tr/tr/c0p469262816.html?colorId=400"
         },
         {
+            "store": "stradivarius",
+            "url": "https://www.stradivarius.com/tr/tr/c0p455810677.html?colorId=602"
+        },
+        {
+            "store": "stradivarius",
+            "url": "https://www.stradivarius.com/tr/tr/c0p475933367.html?colorId=025"
+        },
+        {
             "store": "zara",
             "url": "https://www.zara.com/share/blok-topuklu-bilekte-bot-p13101610.html?v1=495716760&utm_campaign=productShare&utm_medium=mobile_sharing_iOS&utm_source=red_social_movil"
         }
@@ -25,3 +33,4 @@
     "sleep_min_seconds": 500,  
     "sleep_max_seconds": 800
 }
+
