@@ -2,11 +2,7 @@ import json
 import os
 import re
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
-
-# 🔴 SADECE BURASI DEĞİŞTİ
 BOT_API = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -29,18 +25,10 @@ def send_telegram(message):
 # -------------------------------------------------
 
 def extract_inditex_product_id(url):
-    """
-    Bershka / Stradivarius
-    c0p193027833.html -> 193027833
-    """
     match = re.search(r"c0p(\d+)", url)
     return match.group(1) if match else None
 
 def extract_zara_product_id(url):
-    """
-    Zara
-    p13101610.html -> 13101610
-    """
     match = re.search(r"p(\d+)", url)
     return match.group(1) if match else None
 
@@ -88,7 +76,6 @@ for item in config["urls"]:
     store = item["store"]
     url = item["url"]
 
-    # ❌ Mango bilerek kapalı
     if store == "mango":
         print("⏭️ MANGO atlandı")
         continue
