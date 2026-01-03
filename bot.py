@@ -1,21 +1,30 @@
 import json
 import os
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
+# ================== ENV ==================
 
-BOT_API = os.getenv("BOT_API")
-CHAT_ID = os.getenv("CHAT_ID")
+# GitHub Actions + local uyumlu
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-if not BOT_API or not CHAT_ID:
+print("DEBUG TOKEN:", TELEGRAM_BOT_TOKEN)
+print("DEBUG CHAT_ID:", TELEGRAM_CHAT_ID)
+
+if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
     raise RuntimeError("Telegram env variables missing")
 
-def send_telegram(message):
-    url = f"https://api.telegram.org/bot{BOT_API}/sendMessage"
-    requests.post(url, data={"chat_id": CHAT_ID, "text": message}, timeout=10)
+# ================== TELEGRAM ==================
 
-# ---------------- STRADIVARIUS / BERSHKA / ZARA ----------------
+def send_telegram(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message
+    }
+    requests.post(url, data=payload, timeout=10)
+
+# ================== INDITEX ==================
 
 def check_inditex_stock(store, product_id, sizes):
     store_ids = {
@@ -25,7 +34,6 @@ def check_inditex_stock(store, product_id, sizes):
     }
 
     store_id = store_ids[store]
-
     url = f"https://www.{store}.com/itxrest/2/catalog/store/{store_id}/product/{product_id}/stock"
 
     headers = {
@@ -38,12 +46,12 @@ def check_inditex_stock(store, product_id, sizes):
     data = r.json()
 
     for size in data.get("sizes", []):
-        if size["name"] in sizes and size["availability"] == "in_stock":
-            return size["name"]
+        if size.get("name") in sizes and size.get("availability") == "in_stock":
+            return size.get("name")
 
     return None
 
-# ---------------- MANGO ----------------
+# ================== MANGO ==================
 
 def check_mango_stock(product_id, sizes):
     url = f"https://shop.mango.com/ws/products/{product_id}/stock"
@@ -58,26 +66,32 @@ def check_mango_stock(product_id, sizes):
     data = r.json()
 
     for size in data.get("sizes", []):
-        if size["label"] in sizes and size["stock"] > 0:
-            return size["label"]
+        if size.get("label") in sizes and size.get("stock", 0) > 0:
+            return size.get("label")
 
     return None
 
-# ---------------- MAIN ----------------
+# ================== MAIN ==================
 
-with open("config.json") as f:
+with open("config.json", encoding="utf-8") as f:
     config = json.load(f)
 
 sizes_to_check = config["sizes_to_check"]
 
 print("🟢 Stok kontrolü başladı")
 
-for item in config["products"]:
+for item in config["urls"]:
     store = item["store"]
-    product_id = item["product_id"]
     url = item["url"]
 
-    print(f"🔎 Kontrol ediliyor: {store} | {product_id}")
+    # product_id URL'den otomatik çekiliyor
+    try:
+        product_id = url.split("p")[1].split(".")[0]
+    except Exception:
+        print(f"⚠️ product_id alınamadı: {url}")
+        continue
+
+    print(f"🔎 {store.upper()} | {product_id}")
 
     try:
         if store in ["zara", "bershka", "stradivarius"]:
